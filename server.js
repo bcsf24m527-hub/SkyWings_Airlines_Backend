@@ -10,6 +10,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
 
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://skywings-airlines.vercel.app"
+  ],
+  credentials: true
+}));
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -84,4 +91,5 @@ db.pool.getConnection()
     console.error('\nTo test connection: node database/scripts/test_mysql_connection.js');
     process.exit(1);
   });
+
 
