@@ -13,7 +13,7 @@ const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://skywings-airlines.vercel.app"
+    "https://skywingsairlines2.vercel.app/"
   ],
   credentials: true
 }));
@@ -91,5 +91,6 @@ db.pool.getConnection()
     console.error('\nTo test connection: node database/scripts/test_mysql_connection.js');
     process.exit(1);
   });
+
 
 
