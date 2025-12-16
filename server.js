@@ -1,29 +1,23 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+require('dotenv').config();
 
-// Initialize database connection
 const db = require('./config/database');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
-const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
 
+// Enable CORS for your frontend
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://skywingsairlines2.vercel.app/"
+    "https://skywingsairlines2.vercel.app"
   ],
   credentials: true
 }));
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Serve static files
-app.use(express.static(FRONTEND_DIR));
 
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -39,14 +33,6 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'SkyWings API is running' });
 });
 
-// Serve HTML files
-app.get('*', (req, res) => {
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ error: 'API endpoint not found' });
-  }
-  res.sendFile(path.join(FRONTEND_DIR, req.path === '/' ? 'index.html' : req.path));
-});
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
@@ -57,25 +43,19 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server after database connection is verified
+// Start server after database connection
 db.pool.getConnection()
   .then(connection => {
     console.log('✅ Database connected successfully');
     connection.release();
-    
-    // Start HTTP server on the correct port (not MySQL port 3306)
+
     const server = app.listen(PORT, () => {
-      console.log(`🚀 SkyWings Airlines server running on http://localhost:${PORT}`);
-      console.log(`📊 API endpoints available at http://localhost:${PORT}/api`);
-      console.log(`🌐 Access the application at http://localhost:${PORT}`);
+      console.log(`🚀 SkyWings Airlines server running on port ${PORT}`);
     });
-    
-    // Handle server errors
+
     server.on('error', (err) => {
       if (err.code === 'EADDRINUSE') {
         console.error(`❌ Port ${PORT} is already in use.`);
-        console.error(`   Please stop the other process or change PORT in .env file`);
-        console.error(`   Note: PORT should be for HTTP server (e.g., 3000), not MySQL port (3306)`);
       } else {
         console.error('❌ Server error:', err.message);
       }
@@ -84,13 +64,5 @@ db.pool.getConnection()
   })
   .catch(err => {
     console.error('❌ Failed to connect to database:', err.message);
-    console.error('Please ensure:');
-    console.error('  1. MySQL Server is running (not XAMPP MySQL)');
-    console.error('  2. Database credentials are correct in .env file');
-    console.error('  3. Database "skywings_airlines" exists');
-    console.error('\nTo test connection: node database/scripts/test_mysql_connection.js');
     process.exit(1);
   });
-
-
-
